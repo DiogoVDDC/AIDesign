@@ -9,7 +9,7 @@ const MainCTA = () => {
   return (
     <>
       <div className="container pb-[70px] text-center">
-        <p className="text-5xl  mb-[30px] font-serif">
+        <p className="mb-[30px]  font-serif text-5xl">
           The easy way to make your data <br></br>FAIR compliant.
         </p>
         <p className="mb-[50px] text-lg text-slate-500">
