@@ -1,0 +1,6 @@
+# # https://www.serverless.com/framework/docs/guides/compose
+# # serverless deploy --service=service-a
+services:
+  buckets:
+    path: ./buckets
+    config: serverless-buckets.yaml

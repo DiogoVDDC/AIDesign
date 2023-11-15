@@ -1,0 +1,91 @@
+service: altea-buckets
+provider:
+  versionFunctions: false
+  name: aws
+  timeout: 15
+  runtime: nodejs16.x
+  region: ${self:custom.region}
+  memorySize: 128
+  httpApi:
+    cors: true
+  deploymentBucket: altea-${sls:stage}-${self:custom.region}-deployment-bucket
+
+plugins:
+  - serverless-better-credentials
+
+package:
+  individually: true
+  patterns:
+    - "!node_modules/**"
+
+custom:
+  region: eu-west-3
+  S3PersonFilesName: altea-${sls:stage}-person-file
+
+resources:
+  Resources:
+    # s3 person files --------------
+    S3PersonFiles:
+      Type: "AWS::S3::Bucket"
+      DeletionPolicy: Delete
+      Properties:
+        BucketName: ${self:custom.S3PersonFilesName}
+        PublicAccessBlockConfiguration: #https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-publicaccessblockconfiguration.html
+          BlockPublicAcls: true
+          BlockPublicPolicy: false
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: false
+
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders:
+                - "*"
+              AllowedMethods:
+                - GET
+                - PUT
+                - HEAD
+              AllowedOrigins:
+                - "*" #TODO only domain from our website
+
+    # TODO: THIS ALLOWS ANYONE TO READ FROM THE BUCKET WHICH IS NOT GREAT. WOULD BE BETTER FOR THAT PERMISSION TO BE IN AN IAM USER  WHICH REQUEST A SIGNED GET URL TO ACCESS THE DATA
+    S3BucketPolicyPersonFiles:
+      Type: AWS::S3::BucketPolicy
+      DependsOn: S3PersonFiles
+      Properties:
+        Bucket: ${self:custom.S3PersonFilesName}
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal: "*"
+              Action:
+                - "s3:GetObject"
+              Resource: !Sub "arn:aws:s3:::${self:custom.S3PersonFilesName}/*"
+
+    S3PersonFilesIAMUser:
+      Type: AWS::IAM::User
+      Properties:
+        Policies:
+          - PolicyName: s3_person_files
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - s3:PutObject
+                    - s3:GetObject
+                  Resource: "arn:aws:s3:::${self:custom.S3PersonFilesName}/*"
+
+    S3PersonFilesAccessKey:
+      Type: AWS::IAM::AccessKey
+      Properties:
+        UserName: !Ref S3PersonFilesIAMUser
+
+  Outputs:
+    S3PersonFilesBucketName:
+      Value: ${self:custom.S3PersonFilesName}
+
+    S3PersonFilesAccessKeyId:
+      Value: !Ref S3PersonFilesAccessKey
+
+    S3PersonFilesSecretAccessKeyId:
+      Value: !GetAtt S3PersonFilesAccessKey.SecretAccessKey

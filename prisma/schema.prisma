@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("POSTGRES_URL")
+}
+
+// model Post {
+//     id String @id @default(cuid())
+//     createdAt DateTime @default(now())
+//     content String @db.VarChar(255)
+//     authorId String
+//     @@index([authorId])
+// }
+
+model Person {
+    id String @id @default(cuid())
+    created_at DateTime @default(now())
+    organization_id String 
+    name String 
+    lastname String
+    sex String
+    civil_status String?
+    maiden_name String?
+    birth_place String? 
+    other_name String?
+    AVS String? 
+    birth_date DateTime?
+    father_first_name String?
+    father_last_name String?
+    mother_first_name String?
+    mother_last_name String?
+    mother_maiden_name String?
+
+    files File[]
+    addresses   Address[]
+
+    @@index([organization_id], name: "organizationIdIndex")
+
+}
+
+model File {
+    id String @id @default(cuid())
+    created_at DateTime @default(now())
+    filename String 
+    filetype String
+    url String
+    
+    person_id String
+    person Person @relation(fields: [person_id], references: [id], onDelete: Cascade)
+}
+
+model Address {
+    id       String     @id @default(cuid())
+    street1   String
+    street2   String
+    city     String
+    state    String
+    zip      String
+
+    person_id String
+    person Person @relation(fields: [person_id], references: [id], onDelete: Cascade)
+}
+
+model DocumentTemplate {
+    id       String     @id @default(cuid())
+    name String 
+    organization_id String 
+    template String
+    input_schema String
+}

@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn {
+    text-transform: none;
+  }
+}
+
+@layer base {
+  html {
+    font-family: "Inter";
+    color: white;
+  }
+}
+
+.btn-primary {
+  color: white;
+}
+
+.btn {
+  font-size: 16px;
+}
+
+/* p,
+div,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Onest", sans-serif;
+} */
+
+/* .gradient-text-purple-to-blue {
+  background: linear-gradient(to right, #800080, #0000ff);
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+} */
